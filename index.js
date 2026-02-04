@@ -21,7 +21,7 @@ console.log("connected successfully with mongodb")
 const app = express()
 
 app.use(cors({
-    origin: ['https://bazarify-website.vercel.app'],
+    origin: ['https://bazarify-website.vercel.app', 'http://localhost:5173'],
     credentials: true
 }
 ))
@@ -29,7 +29,7 @@ app.use(cors({
 const server = createServer(app)
 const io = new Server(server, {
     cors: {
-        origin: ['https://bazarify-website.vercel.app'],
+        origin: ['https://bazarify-website.vercel.app', 'http://localhost:5173'],
         credentials: true
     }
 })
