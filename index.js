@@ -67,6 +67,6 @@ app.use(adminRoutes)
 //     res.send("hello world")
 // })
 
-server.listen(process.env.PORT, () => {
+server.listen(process.env.PORT || 5000, () => {
     console.log(`app is listening on Port ${process.env.PORT}`)
 })
