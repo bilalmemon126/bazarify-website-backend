@@ -13,41 +13,37 @@ router.post('/favourite/:productId/:userId', async (req, res) => {
         let checkUser = await User.findOne({ _id: userId })
         let findProducts = await Product.findOne({ _id: productId })
 
-        if (checkUser) {
-            if (findProducts) {
-                let findFavourite = await Favourite.findOne({userId, productId})
-
-                if(findFavourite){
-                    let removeFavourite = await Favourite.deleteOne(findFavourite)
-
-                    if(removeFavourite){
-                        return res.send({
-                            status: 1,
-                            message: "removed from favourite successfully"
-                        })
-                    }
-                }
-
-                let addFavourite = await Favourite.insertOne({userId, productId})
-
-                if(addFavourite){
-                    return res.status(200).send({
-                        status: 1,
-                        message: "product added to favourite successfully"
-                    })
-                }
-            }
-            else {
-                return res.status(400).send({
-                    status: 0,
-                    message: "Product Not Found"
-                })
-            }
-        }
-        else {
+        if (!checkUser) {
             return res.status(400).send({
                 status: 0,
                 message: "something went wrong"
+            })
+        }
+        if (!findProducts) {
+            return res.status(400).send({
+                status: 0,
+                message: "Product Not Found"
+            })
+        }
+
+        let findFavourite = await Favourite.findOne({ userId, productId })
+
+        if (!findFavourite) {
+            let addFavourite = await Favourite.insertOne({ userId, productId })
+
+            if (addFavourite) {
+                return res.status(200).send({
+                    status: 1,
+                    message: "product added to favourite successfully"
+                })
+            }
+        }
+        let removeFavourite = await Favourite.deleteOne({ _id: findFavourite._id })
+
+        if (removeFavourite) {
+            return res.send({
+                status: 1,
+                message: "removed from favourite successfully"
             })
         }
     }

@@ -102,4 +102,29 @@ const productSchema = new mongoose.Schema({
     timestamps: true
 })
 
+
+productSchema.index(
+    {isBlocked: 1, title: "text", description: "text"},
+    {weights: {title: 5, description: 1}}
+)
+
+productSchema.index(
+    {category: 1, price: 1},
+    {partialFilterExpression: {isBlocked: false}}
+)
+
+productSchema.index(
+    {category: 1, price: -1},
+    {partialFilterExpression: {isBlocked: false}}
+)
+
+productSchema.index(
+    {category: 1, location: 1},
+    {partialFilterExpression: {isBlocked: false}}
+)
+
+productSchema.index(
+    {createdBy: 1, createdAt: 1}
+)
+
 export const Product = mongoose.model('Product', productSchema)

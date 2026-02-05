@@ -1,7 +1,6 @@
 import express from 'express'
 import { Product } from '../../models/product.model.js'
 import { Category } from '../../models/category.model.js'
-import { ObjectId } from 'mongodb'
 const router = express.Router()
 
 
@@ -9,6 +8,10 @@ router.get('/product', async (req, res) => {
     try {
         let filter = {}
         let sort = {createdAt: -1}
+
+        if(req.query.search){
+            filter.$text = {$search: req.query.search}
+        }
 
         if(req.query.category){
             let findCategory = await Category.findOne({categoryName: req.query.category})
@@ -39,6 +42,8 @@ router.get('/product', async (req, res) => {
                 filter.price.$lte = Number(req.query.maxPrice)
             }
         }
+
+        filter.isBlocked = false
 
         if(req.query.sort === "lowestPrice"){
             sort = {price: 1}

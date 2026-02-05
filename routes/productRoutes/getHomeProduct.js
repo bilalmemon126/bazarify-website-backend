@@ -8,6 +8,10 @@ router.get('/product/home', async (req, res) => {
     try {
         let filter = {}
 
+        // if(req.query.search){
+        //     filter.$text = {$search: req.query.search}
+        // }
+
         let findCategory = await Category.find({ alsoForHome: true })
 
         let allProducts = []
