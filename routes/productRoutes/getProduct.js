@@ -8,10 +8,14 @@ router.get('/product', async (req, res) => {
     try {
         let filter = {}
         let sort = {createdAt: -1}
+        let projection ={}
 
         if(req.query.search){
             filter.$text = {$search: req.query.search}
+            sort = {score: {$meta: "textScore"}}
+            projection.score = {$meta: "textScore"}
         }
+        console.log(req.query.search)
 
         if(req.query.category){
             let findCategory = await Category.findOne({categoryName: req.query.category})
@@ -53,11 +57,11 @@ router.get('/product', async (req, res) => {
             sort = {price: -1}
         }
         
-        let findProduct = await Product.find(filter)
+        let findProducts = await Product.find(filter, projection)
         .sort(sort)
         .populate("category createdBy location")
 
-        if (!findProduct) {
+        if (findProducts.length === 0) {
             return res.send({
                 status: 0,
                 message: "Product Not Found",
@@ -68,7 +72,7 @@ router.get('/product', async (req, res) => {
         return res.send({
             status: 1,
             message: "all products fetched successfully",
-            data: findProduct
+            data: findProducts
         })
     }
     catch (error) {

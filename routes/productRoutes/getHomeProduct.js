@@ -8,28 +8,23 @@ router.get('/product/home', async (req, res) => {
     try {
         let filter = {}
 
-        // if(req.query.search){
-        //     filter.$text = {$search: req.query.search}
-        // }
-
         let findCategory = await Category.find({ alsoForHome: true })
 
-        let allProducts = []
-        if (!findCategory) {
+        
+        if (!findCategory.length) {
             return res.send({
                 status: 0,
                 message: "something went wrong",
                 data: []
             })
         }
-
-        if(req.query.location){
-            filter.location = req.query.location
-        }
         
+        
+        let allProducts = []
         
         let fetchingProducts = findCategory.map((v, i) => {
             filter.category = v._id
+            
             return Product.find(filter)
             .sort({ createdAt: -1 })
             .limit(4)
