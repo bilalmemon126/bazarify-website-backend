@@ -5,7 +5,7 @@ import { Chat } from '../../models/chat.model.js'
 import mongoose from 'mongoose'
 const router = express.Router()
 
-router.get('/chat/:userId', async (req, res) => {
+router.get('/:userId', async (req, res) => {
     try {
         let userId = new ObjectId(req.params.userId)
         let checkUser = await User.findOne({ _id: userId })

@@ -72,7 +72,7 @@ router.post("/login", async (req, res) => {
         }
 
         const token = jwt.sign({
-            firstName: req.body.firstName,
+            firstName: checkUser.firstName,
             userId: checkUser._id,
             email: checkUser.email
         }, process.env.MY_SECRET, { expiresIn: "1h" })
@@ -83,7 +83,7 @@ router.post("/login", async (req, res) => {
             sameSite: "none",
         })
 
-        const sendUserData = await User.findOne({ _id: checkUser._id }, { projection: { _id: 1, firstName: 1 } })
+        const sendUserData = await User.findOne({ _id: checkUser._id })
         return res.status(200).send({
             status: 1,
             message: "Login Successfully",

@@ -10,6 +10,11 @@ router.get("/protected", async (req, res, next) => {
         const token = await req.cookies.token
 
         if (!token) {
+            res.clearCookie('token', {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+            })
             return res.status(401).send({
                 status: 0,
                 myToken: token,
@@ -19,6 +24,11 @@ router.get("/protected", async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.MY_SECRET)
 
         if (!decoded) {
+            res.clearCookie('token', {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+            })
             return res.status(400).send({
                 status: 0,
                 message: "something went wrong"

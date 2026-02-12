@@ -5,7 +5,7 @@ import { User } from '../../models/user.model.js'
 import { Chat } from '../../models/chat.model.js'
 const router = express.Router()
 
-router.get('/chat/:productId/:userId', async (req, res) => {
+router.post('/:productId/:userId', async (req, res) => {
     try {
         let productId = new ObjectId(req.params.productId)
         let userId = new ObjectId(req.params.userId)
@@ -29,15 +29,19 @@ router.get('/chat/:productId/:userId', async (req, res) => {
             })
         }
 
+        // let getAllChats = await Chat.find({
+        //     productId: productId,
+        //     $or: [
+        //         { buyerId: userId },
+        //         { sellerId: userId }
+        //     ]
+        // })
+
         let getAllChats = await Chat.find({
-            productId: productId,
-            $or: [
-                { buyerId: userId },
-                { sellerId: userId }
-            ]
+            roomId: req.body.roomId
         })
 
-        if (!getAllChats) {
+        if (!getAllChats.length) {
             return res.status(400).send({
                 status: 0,
                 message: "something went wrong",
