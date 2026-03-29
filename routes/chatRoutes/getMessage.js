@@ -29,14 +29,6 @@ router.post('/:productId/:userId', async (req, res) => {
             })
         }
 
-        // let getAllChats = await Chat.find({
-        //     productId: productId,
-        //     $or: [
-        //         { buyerId: userId },
-        //         { sellerId: userId }
-        //     ]
-        // })
-
         let getAllChats = await Chat.find({
             roomId: req.body.roomId
         })
@@ -59,7 +51,7 @@ router.post('/:productId/:userId', async (req, res) => {
         return res.status(400).send({
             status: 0,
             error: error,
-            message: "Internal Server Error"
+            message: "Internal Server Errowoqor"
         })
     }
 })

@@ -4,7 +4,7 @@ import { Product } from '../../models/product.model.js'
 import { Chat } from '../../models/chat.model.js'
 const router = express.Router()
 
-router.post('/chat', async (req, res) => {
+router.post("/send", async (req, res) => {
     try {
         let checkBuyer = await User.findOne({ _id: req.body.buyerId })
         let checkSeller = await User.findOne({ _id: req.body.sellerId })
@@ -63,7 +63,7 @@ router.post('/chat', async (req, res) => {
         return res.status(400).send({
             status: 0,
             error: error,
-            message: "Internal Server Error"
+            message: "Internal Server Errooor"
         })
     }
 })

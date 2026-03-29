@@ -62,7 +62,7 @@ router.get('/:userId', async (req, res) => {
         return res.status(400).send({
             status: 0,
             error: error,
-            message: "Internal Server Error"
+            message: "Internal Server Errorroror"
         })
     }
 })

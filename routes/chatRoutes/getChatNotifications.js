@@ -1,7 +1,7 @@
 import express from 'express'
 import { ObjectId } from 'mongodb'
 import { User } from '../../models/user.model.js'
-import { Chat } from '../../models/chat.model.js'
+import { ChatNotification } from '../../models/chatNotification.model.js'
 const router = express.Router()
 
 router.get('/notifications/:userId', async (req, res) => {
@@ -17,26 +17,16 @@ router.get('/notifications/:userId', async (req, res) => {
             })
         }
 
-        let getAllNotifications = await Chat.find(
-            {
-                $or: [
-                    { buyerId: userId },
-                    { sellerId: userId }
-                ],
-                senderId: { $ne: userId }
-            },
-            { roomId: 1, _id: 0 }
-        )
+        let getAllNotifications = await ChatNotification.find({receiverId: userId})
 
         if (!getAllNotifications.length) {
             return res.status(400).send({
                 status: 0,
-                message: "something went wrong",
+                message: "no notifications available",
                 data: []
             })
         }
 
-        console.log(getAllNotifications)
         return res.status(200).send(
             {
                 status: 1,

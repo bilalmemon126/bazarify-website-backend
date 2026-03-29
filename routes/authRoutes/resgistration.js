@@ -19,13 +19,13 @@ router.post("/register", async (req, res) => {
                 })
             }
         }
-        if(!req.body.firstName || !req.body.lastName || !req.body.email || !req.body.password || !req.body.phone){
+        if (!req.body.firstName || !req.body.lastName || !req.body.email || !req.body.password || !req.body.phone) {
             return res.status(400).send({
                 statue: 0,
                 message: "all fields are required"
             })
         }
-        
+
         let email = req.body.email.toLowerCase()
         const emailFormat = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -43,6 +43,15 @@ router.post("/register", async (req, res) => {
             })
         }
         else {
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$!%*?&])[A-Za-z\d@#$!%*?&]{8,}$/;
+            if (!passwordRegex.test(req.body.password)) {
+                return res.status(400).send({
+                    status: 0,
+                    message: "please choose strong password",
+                    data: ""
+                })
+            }
+            
             const hashedPassword = await bcrypt.hashSync(req.body.password, 10)
             let verificationOTP = Math.floor(100000 + Math.random() * 900000)
             const expiryOTP = Date.now() + 2 * 60 * 1000;
