@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt'
 import { sendOtp } from '../../config/sendOtp.js'
 import jwt from 'jsonwebtoken'
 import { User } from '../../models/user.model.js'
+import { errorMessage, successMessage } from '../../utils/responseMessage.js'
 
 const router = express.Router()
 
@@ -20,36 +21,23 @@ router.post("/register", async (req, res) => {
             }
         }
         if (!req.body.firstName || !req.body.lastName || !req.body.email || !req.body.password || !req.body.phone) {
-            return res.status(400).send({
-                statue: 0,
-                message: "all fields are required"
-            })
+            return errorMessage(res, 404, "all fields are required", [])
         }
 
         let email = req.body.email.toLowerCase()
         const emailFormat = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
         if (!email.match(emailFormat)) {
-            return res.status(400).send({
-                status: 0,
-                message: "invalid email format"
-            })
+            return errorMessage(res, 400, "invalid email format", [])
         }
         const checkUser = await User.findOne({ email: email })
         if (checkUser) {
-            return res.status(409).send({
-                status: 0,
-                message: "email already exist"
-            })
+            return errorMessage(res, 409, "email already exist", [])
         }
         else {
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$!%*?&])[A-Za-z\d@#$!%*?&]{8,}$/;
             if (!passwordRegex.test(req.body.password)) {
-                return res.status(400).send({
-                    status: 0,
-                    message: "please choose strong password",
-                    data: ""
-                })
+                return errorMessage(res, 400, "please choose strong password", [])
             }
             
             const hashedPassword = await bcrypt.hashSync(req.body.password, 10)
@@ -72,17 +60,10 @@ router.post("/register", async (req, res) => {
             if (insertUser) {
                 const findUser = await User.findOne({ _id: insertUser._id })
                 sendOtp(`${email}`, `${verificationOTP}`);
-                return res.status(200).send({
-                    status: 1,
-                    message: "registered successfully",
-                    data: findUser
-                })
+                return successMessage(res, "registered successfully", findUser)
             }
             else {
-                return res.status(400).send({
-                    status: 0,
-                    message: "something went wrong"
-                })
+                return errorMessage(res, 400, "Something Went Wrong", [])
             }
         }
     }

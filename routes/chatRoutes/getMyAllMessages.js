@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb'
 import { User } from '../../models/user.model.js'
 import { Chat } from '../../models/chat.model.js'
 import mongoose from 'mongoose'
+import { errorMessage, successMessage } from '../../utils/responseMessage.js'
 const router = express.Router()
 
 router.get('/:userId', async (req, res) => {
@@ -11,11 +12,7 @@ router.get('/:userId', async (req, res) => {
         let checkUser = await User.findOne({ _id: userId })
 
         if (!checkUser) {
-            return res.status(400).send({
-                status: 0,
-                message: "user not found",
-                allChats: []
-            })
+            return errorMessage(res, 404, "user not found", [])
         }
 
         const getAllChats = await Chat.aggregate([
@@ -45,18 +42,11 @@ router.get('/:userId', async (req, res) => {
           ]);
 
         if (!getAllChats) {
-            return res.status(400).send({
-                status: 0,
-                message: "something went wrong",
-                allChats: []
-            })
+          return errorMessage(res, 400, "Something Went Wrong", [])
         }
 
-        return res.status(200).send({
-            status: 1,
-            message: "all chats fetched successfully",
-            allChats: getAllChats
-        })
+        
+        return successMessage(res, "all chats fetched successfully", getAllChats)
     }
     catch (error) {
         return res.status(400).send({

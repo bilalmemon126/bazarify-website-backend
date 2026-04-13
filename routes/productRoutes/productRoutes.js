@@ -1,6 +1,7 @@
 import express from 'express'
 import addProductRoute from './addProduct.js'
 import getProductRoute from './getProduct.js'
+import myProductsRoute from './myProducts.js'
 import getHomeProductRoute from './getHomeProduct.js'
 import getProductDetailsRoute from './getProductDetails.js'
 import deleteProductRoute from './deleteProduct.js'
@@ -9,6 +10,7 @@ const router = express.Router()
 
 router.use(addProductRoute)
 router.use(getProductRoute)
+router.use(myProductsRoute)
 router.use(getHomeProductRoute)
 router.use(getProductDetailsRoute)
 router.use(deleteProductRoute)

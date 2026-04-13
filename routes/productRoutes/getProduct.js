@@ -1,29 +1,34 @@
 import express from 'express'
+import { ObjectId } from 'mongodb'
 import { Product } from '../../models/product.model.js'
 import { Category } from '../../models/category.model.js'
+import { errorMessage, successMessage } from '../../utils/responseMessage.js'
 const router = express.Router()
 
 
-router.get('/product', async (req, res) => {
+router.get('/products/:userId', async (req, res) => {
     try {
-        let filter = {}
+        console.log("get product route")
+        if (!ObjectId.isValid(req.params.userId)) {
+            return errorMessage(res, 400, "Invalid ID format", [])
+        }
+
+        let filter = {createdBy: {$ne: req.params.userId}}
         let sort = {createdAt: -1}
         let projection ={}
-
+        
+        filter.isBlocked = false
+        
         if(req.query.search){
             filter.$text = {$search: req.query.search}
             sort = {score: {$meta: "textScore"}}
             projection.score = {$meta: "textScore"}
         }
-        console.log(req.query.search)
 
         if(req.query.category){
             let findCategory = await Category.findOne({categoryName: req.query.category})
             if(!findCategory){
-                return res.status(400).send({
-                    status: 0,
-                    message: "category not found"
-                })
+                return errorMessage(res, 404, "category not found", [])
             }
             filter.category = findCategory._id
         }
@@ -32,8 +37,8 @@ router.get('/product', async (req, res) => {
             filter.location = req.query.location
         }
 
-        if(req.query.userId){
-            filter.createdBy = req.query.userId
+        if(req.query.productId){
+            filter._id = {$ne: req.query.productId}
         }
 
         if(req.query.minPrice || req.query.maxPrice){
@@ -47,7 +52,6 @@ router.get('/product', async (req, res) => {
             }
         }
 
-        filter.isBlocked = false
 
         if(req.query.sort === "lowestPrice"){
             sort = {price: 1}
@@ -60,23 +64,16 @@ router.get('/product', async (req, res) => {
         let findProducts = await Product.find(filter, projection)
         .sort(sort)
         .populate("category createdBy location")
+        .limit(req.query.limit || "")
 
         if (findProducts.length === 0) {
-            return res.send({
-                status: 0,
-                message: "Product Not Found",
-                data: []
-            })
+            return errorMessage(res, 404, "Product Not Found", [])
         }
 
-        return res.send({
-            status: 1,
-            message: "all products fetched successfully",
-            data: findProducts
-        })
+        return successMessage(res, "all products fetched successfully", findProducts)
     }
     catch (error) {
-        return res.status(400).send({
+        return res.status(500).send({
             status: 0,
             error: error,
             message: "Internal Server Error"

@@ -2,6 +2,7 @@ import express from 'express'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { User } from '../../models/user.model.js'
+import { errorMessage, successMessage } from '../../utils/responseMessage.js'
 
 const router = express.Router()
 
@@ -14,49 +15,31 @@ router.post("/login", async (req, res) => {
         })
 
         if (!req.body.email || !req.body.password) {
-            return res.status(400).send({
-                status: 0,
-                message: "Both Fields are Required"
-            })
+            return errorMessage(res, 404, "both fields are required", [])
         }
         let email = req.body.email.toLowerCase()
         const emailFormat = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
         if (!email.match(emailFormat)) {
-            return res.status(400).send({
-                status: 0,
-                message: "invalid email format"
-            })
+            return errorMessage(res, 400, "invalid email format", [])
         }
 
         let checkUser = await User.findOne({ email }).select("+password")
         if (!checkUser) {
-            return res.status(400).send({
-                status: 0,
-                message: "Email or Password is Invalid"
-            })
+            return errorMessage(res, 400, "email or password is invalid", [])
         }
 
         let hashedPassword = bcrypt.compareSync(req.body.password, checkUser.password);
         if (!hashedPassword) {
-            return res.status(400).send({
-                status: 0,
-                message: "Email or Password is Invalid"
-            })
+            return errorMessage(res, 400, "email or password is invalid", [])
         }
 
         if (!checkUser.isVerified) {
-            return res.status(400).send({
-                status: 0,
-                message: "User Not Verified"
-            })
+            return errorMessage(res, 403, "user not verified", [])
         }
 
         if(checkUser.isBlocked){
-            return res.status(400).send({
-                status: 0,
-                message: "your account is blocked"
-            })
+            return errorMessage(res, 403, "Your account is blocked", [])
         }
 
         const oldToken = await req.cookies.token
@@ -84,11 +67,7 @@ router.post("/login", async (req, res) => {
         })
 
         const sendUserData = await User.findOne({ _id: checkUser._id })
-        return res.status(200).send({
-            status: 1,
-            message: "Login Successfully",
-            data: sendUserData
-        })
+        return successMessage(res, "login successfully", sendUserData)
     }
     catch (error) {
         return res.status(500).send({

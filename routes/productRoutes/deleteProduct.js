@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb'
 import cloudinary from '../../config/cloudinary.js'
 import { Product } from '../../models/product.model.js'
 import { User } from '../../models/user.model.js'
+import { errorMessage, successMessage } from '../../utils/responseMessage.js'
 const router = express.Router()
 
 
@@ -29,31 +30,17 @@ router.delete('/product/:productId/:userId', async (req, res) => {
                 })
 
                 let deleteProduct = await Product.deleteOne({_id: productId})
-                if (deleteProduct) {
-                    return res.send({
-                        status: 1,
-                        message: "Product Deleted Successfully"
-                    })
+                if (!deleteProduct) {
+                    return errorMessage(res, 400, "Something Went Wrong", [])
                 }
-                else {
-                    return res.send({
-                        status: 0,
-                        message: "Something Went Wrong"
-                    })
-                }
+                return successMessage(res, "product deleted successfully", [])
             }
             else {
-                return res.send({
-                    status: 0,
-                    message: "Product Not Found"
-                })
+                return errorMessage(res, 404, "Product Not Found", [])
             }
         }
         else {
-            return res.send({
-                status: 0,
-                message: "something went wrong"
-            })
+            return errorMessage(res, 400, "Something Went Wrong", [])
         }
     }
     catch (error) {

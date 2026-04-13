@@ -1,10 +1,14 @@
 import express from 'express'
 import { ObjectId } from 'mongodb'
 import { User } from '../../../models/user.model.js'
+import { errorMessage, successMessage } from '../../../utils/responseMessage.js'
 const router = express.Router()
 
 router.put('/user/:userId/:adminId', async (req, res) => {
     try {
+        if (!ObjectId.isValid(req.params.userId) || !ObjectId.isValid(req.params.adminId)) {
+            return errorMessage(res, 400, "Invalid ID format", [])
+        }
         let userId = new ObjectId(req.params.userId)
         let adminId = new ObjectId(req.params.adminId)
         let checkUser = await User.findOne({ _id: userId })
@@ -12,24 +16,15 @@ router.put('/user/:userId/:adminId', async (req, res) => {
 
         
         if (!checkAdmin) {
-            return res.status(400).send({
-                status: 0,
-                message: "only admin can access this route"
-            })
+            return errorMessage(res, 404, "Admin Not Found", [])
         }
 
-        if(!checkAdmin.isAdmin){
-            return res.status(400).send({
-                status: 0,
-                message: "only admin can update this user"
-            })
+        if (!checkAdmin.isAdmin) {
+            return errorMessage(res, 403, "Only admin can update this user", [])
         }
 
         if (!checkUser) {
-            return res.send({
-                status: 0,
-                message: "user Not Found"
-            })
+            return errorMessage(res, 404, "User Not Found", [])
         }
 
         let updateUser =await User.updateOne(
@@ -39,16 +34,10 @@ router.put('/user/:userId/:adminId', async (req, res) => {
         )
 
         if (!updateUser) {
-            return res.send({
-                status: 0,
-                message: "Something Went Wrong"
-            })
+            return errorMessage(res, 500, "Something Went Wrong", [])
         }
 
-        return res.send({
-            status: 1,
-            message: "user updated Successfully"
-        })
+        return successMessage(res, "User updated successfully", [])
     }
     catch (error) {
         return res.status(400).send({

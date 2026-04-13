@@ -4,7 +4,7 @@ import getFavouriteRoute from './getFavourite.js'
 
 const router = express.Router()
 
-router.use(addFavouriteRoute)
-router.use(getFavouriteRoute)
+router.use("/favourite", addFavouriteRoute)
+router.use("/favourite", getFavouriteRoute)
 
 export default router

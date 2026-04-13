@@ -39,18 +39,10 @@ app.use(cookieParser())
 
 app.use(authRoutes)
 
-const onlineUsers = []
 
 io.on('connection', (socket) => {
     console.log("a user connected", socket.id)
-    socket.on("userOnline", (userId) => {
-        userId = String(userId)
-        if (!onlineUsers.some(u => u.userId === userId)) {
-            onlineUsers.push({ userId, socketId: socket.id });
-        }
 
-        io.emit("onlineUsers", onlineUsers);
-    })
     socket.on("joinNotification", (userId) => {
         socket.join(userId)
     })
@@ -69,25 +61,13 @@ io.on('connection', (socket) => {
 
     socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id)
-
-        // for (let [userId, socketId] of onlineUsers.entries()) {
-        //     if (socketId === socket.id) {
-        //         onlineUsers.delete(userId)
-        //         break
-        //     }
-        // }
-
-        // io.emit("onlineUsers", Array.from(onlineUsers.keys()))
-        let newOnlineUsers = onlineUsers.filter((v, i) => {return v.socketId == socket.id})
-        console.log(newOnlineUsers)
-        io.emit("onlineUsers", newOnlineUsers)
     })
 })
 
 app.use(productRoutes)
 app.use(getCategoryRoute)
 app.use(getLocationRoute)
-// app.use(favouriteRoutes)
+app.use(favouriteRoutes)
 app.use(chatRoutes)
 
 app.use(adminRoutes)

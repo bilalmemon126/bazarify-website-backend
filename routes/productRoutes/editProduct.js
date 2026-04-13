@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb'
 import cloudinary from '../../config/cloudinary.js'
 import { User } from '../../models/user.model.js'
 import { Product } from '../../models/product.model.js'
+import { errorMessage, successMessage } from '../../utils/responseMessage.js'
 const router = express.Router()
 
 router.put('/product/:productId/:userId', upload.fields([
@@ -21,10 +22,7 @@ router.put('/product/:productId/:userId', upload.fields([
             if (findProducts) {
                 if (findProducts.createdBy.equals(userId)) {
                     if (!req.files.mainImage && !req.body.mainImage || !req.files.images && !req.body.images || !req.body.title || !req.body.description || !req.body.price || !req.body.status || !req.body.location) {
-                        return res.status(400).send({
-                            status: 0,
-                            message: "all fields are required"
-                        })
+                        return errorMessage(res, 400, "all fields are required", [])
                     }
                     else {
                         let products = {}
@@ -90,10 +88,7 @@ router.put('/product/:productId/:userId', upload.fields([
 
                         if (category == "bike" || category == "car") {
                             if (!req.body.make) {
-                                return res.status(400).send({
-                                    status: 0,
-                                    message: "all fields are required"
-                                })
+                                return errorMessage(res, 400, "all fields are required", [])
                             }
                             products = {
                                 mainImage: mainImageResult,
@@ -114,10 +109,7 @@ router.put('/product/:productId/:userId', upload.fields([
                         }
                         if (category == "mobile" || category == "tablet" || category == "electronics" || category == "furniture") {
                             if (!req.body.brand) {
-                                return res.status(400).send({
-                                    status: 0,
-                                    message: "all fields are required"
-                                })
+                                return errorMessage(res, 400, "all fields are required", [])
                             }
                             products = {
                                 mainImage: mainImageResult,
@@ -139,10 +131,7 @@ router.put('/product/:productId/:userId', upload.fields([
 
                         if (category == "house") {
                             if (!req.body.bedrooms || !req.body.bathrooms || !req.body.areaUnit || !req.body.area) {
-                                return res.status(400).send({
-                                    status: 0,
-                                    message: "all fields are required"
-                                })
+                                return errorMessage(res, 400, "all fields are required", [])
                             }
                             products = {
                                 mainImage: mainImageResult,
@@ -167,10 +156,7 @@ router.put('/product/:productId/:userId', upload.fields([
 
                         if (category == "fashion") {
                             if (!req.body.brand || !req.body.fabric || !req.body.gender) {
-                                return res.status(400).send({
-                                    status: 0,
-                                    message: "all fields are required"
-                                })
+                                return errorMessage(res, 400, "all fields are required", [])
                             }
                             products = {
                                 mainImage: mainImageResult,
@@ -213,39 +199,23 @@ router.put('/product/:productId/:userId', upload.fields([
                             { $set: products },
                             {}
                         )
-                        if (updateProduct) {
-                            return res.send({
-                                status: 1,
-                                message: "Product Updated Successfully"
-                            })
+                        if (!updateProduct) {
+                            return errorMessage(res, 400, "Something Went Wrong", [])
                         }
-                        else {
-                            return res.send({
-                                status: 0,
-                                message: "Something Went Wrong"
-                            })
-                        }
+
+                        return successMessage(res, "products updated successfully", [])
                     }
                 }
                 else {
-                    return res.send({
-                        status: 0,
-                        message: "something went wrong"
-                    })
+                    return errorMessage(res, 400, "Something Went Wrong", [])
                 }
             }
             else {
-                return res.send({
-                    status: 0,
-                    message: "Product Not Found"
-                })
+                return errorMessage(res, 404, "Product Not Found", [])
             }
         }
         else {
-            return res.send({
-                status: 0,
-                message: "something went wrong"
-            })
+            return errorMessage(res, 400, "Something Went Wrong", [])
         }
     }
     catch (error) {

@@ -1,25 +1,17 @@
 import express from 'express'
 import { User } from '../../../models/user.model.js'
+import { errorMessage, successMessage } from '../../../utils/responseMessage.js'
 const router = express.Router()
 
 router.get('/user', async (req, res) => {
     try {
         let findUsers = await User.find()
         let filteredUsers = findUsers.filter((v, i) => !v.isAdmin)
-        if (filteredUsers.length > 0) {
-            return res.status(200).send({
-                status: 1,
-                message: "fetch all users successfully",
-                data: filteredUsers
-            })
+        if (!filteredUsers.length) {
+            return errorMessage(res, 404, "users not found", [])
         }
-        else {
-            return res.status(400).send({
-                status: 0,
-                message: "users not found",
-                data: []
-            })
-        }
+        
+        return successMessage(res, "fetch all users successfully", filteredUsers)
     }
     catch (error) {
         return res.status(400).send({

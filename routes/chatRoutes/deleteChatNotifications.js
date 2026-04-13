@@ -2,6 +2,7 @@ import express from 'express'
 import { ObjectId } from 'mongodb'
 import { ChatNotification } from '../../models/chatNotification.model.js'
 import { User } from '../../models/user.model.js'
+import { errorMessage, successMessage } from '../../utils/responseMessage.js'
 const router = express.Router()
 
 router.delete('/notifications/:userId', async (req, res) => {
@@ -10,35 +11,24 @@ router.delete('/notifications/:userId', async (req, res) => {
         let checkUser = await User.findOne({_id: userId})
 
         if (!checkUser) {
-            return res.status(400).send({
-                status: 0,
-                message: "user not found"
-            })
+            return errorMessage(res, 404, "user not found", [])
         }
 
         let {chatRoomId} = req.body
 
         if(!chatRoomId){
-            return res.status(400).send({
-                status: 0,
-                message: "something went wrong"
-            })
+            errorMessage(res, 400, "Something Went Wrong", [])
         }
 
         let deleteNotification = await ChatNotification.deleteMany({receiverId: userId, chatRoomId})
 
         if(!deleteNotification){
-            return res.status(400).send({
-                status: 0,
-                message: "something went wrong"
-            })
+            errorMessage(res, 400, "Something Went Wrong", [])
         }
 
 
-        return res.status(200).send({
-            status: 1,
-            message: "notification deleted successfully"
-        })
+        
+        return successMessage(res, "notification deleted successfully", [])
     }
     catch (error) {
         return res.status(400).send({

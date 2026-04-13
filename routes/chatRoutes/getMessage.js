@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb'
 import { Product } from '../../models/product.model.js'
 import { User } from '../../models/user.model.js'
 import { Chat } from '../../models/chat.model.js'
+import { errorMessage, successMessage } from '../../utils/responseMessage.js'
 const router = express.Router()
 
 router.post('/:productId/:userId', async (req, res) => {
@@ -14,19 +15,11 @@ router.post('/:productId/:userId', async (req, res) => {
         let checkUser = await User.findOne({ _id: userId })
 
         if (!checkProduct) {
-            return res.status(400).send({
-                status: 0,
-                message: "product not found",
-                chats: []
-            })
+            return errorMessage(res, 404, "product not found", [])
         }
 
         if (!checkUser) {
-            return res.status(400).send({
-                status: 0,
-                message: "user not found",
-                chats: []
-            })
+            return errorMessage(res, 404, "user not found", [])
         }
 
         let getAllChats = await Chat.find({
@@ -34,18 +27,11 @@ router.post('/:productId/:userId', async (req, res) => {
         })
 
         if (!getAllChats.length) {
-            return res.status(400).send({
-                status: 0,
-                message: "something went wrong",
-                chats: []
-            })
+            return errorMessage(res, 400, "Something Went Wrong", [])
         }
 
-        return res.status(200).send({
-            status: 1,
-            message: "all chats fetched successfully",
-            chats: getAllChats
-        })
+        
+        return successMessage(res, "all chats fetched successfully", getAllChats)
     }
     catch (error) {
         return res.status(400).send({

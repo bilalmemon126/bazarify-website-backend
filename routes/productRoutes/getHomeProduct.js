@@ -1,22 +1,23 @@
 import express from 'express'
+import { ObjectId } from 'mongodb'
 import { Product } from '../../models/product.model.js'
 import { Category } from '../../models/category.model.js'
+import { errorMessage, successMessage } from '../../utils/responseMessage.js'
 const router = express.Router()
 
 
 router.get('/product/home', async (req, res) => {
     try {
         let filter = {}
+        if(req.query.userId){
+            filter.createdBy = {$ne: req.query.userId}
+        }
 
         let findCategory = await Category.find({ alsoForHome: true })
 
         
         if (!findCategory.length) {
-            return res.send({
-                status: 0,
-                message: "something went wrong",
-                data: []
-            })
+            return errorMessage(res, 404, "category not found", [])
         }
         
         
@@ -38,17 +39,9 @@ router.get('/product/home', async (req, res) => {
         allProducts = await Promise.all(fetchingProducts)
 
         if (allProducts.length === 0) {
-            return res.send({
-                status: 0,
-                message: "Product Not Found",
-                data: []
-            })
+            return errorMessage(res, 404, "Product Not Found", [])
         }
-        return res.send({
-            status: 1,
-            message: "all products fetched successfully",
-            data: allProducts
-        })
+        return successMessage(res, "all products fetched successfully", allProducts)
     }
     catch (error) {
         return res.status(400).send({

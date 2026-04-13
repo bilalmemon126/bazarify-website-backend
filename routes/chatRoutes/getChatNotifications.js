@@ -2,6 +2,7 @@ import express from 'express'
 import { ObjectId } from 'mongodb'
 import { User } from '../../models/user.model.js'
 import { ChatNotification } from '../../models/chatNotification.model.js'
+import { errorMessage, successMessage } from '../../utils/responseMessage.js'
 const router = express.Router()
 
 router.get('/notifications/:userId', async (req, res) => {
@@ -10,30 +11,18 @@ router.get('/notifications/:userId', async (req, res) => {
         let checkUser = await User.findOne({ _id: userId })
 
         if (!checkUser) {
-            return res.status(400).send({
-                status: 0,
-                message: "user not found",
-                data: []
-            })
+            
+            return errorMessage(res, 404, "user not found", [])
         }
 
         let getAllNotifications = await ChatNotification.find({receiverId: userId})
 
         if (!getAllNotifications.length) {
-            return res.status(400).send({
-                status: 0,
-                message: "no notifications available",
-                data: []
-            })
+            return errorMessage(res, 404, "notifications not available", [])
         }
 
-        return res.status(200).send(
-            {
-                status: 1,
-                message: "all notifications fetched successfully",
-                data: getAllNotifications
-            }
-        )
+        
+        return successMessage(res, "all notifications fetched successfully", getAllNotifications)
     }
     catch (error) {
         return res.status(400).send({

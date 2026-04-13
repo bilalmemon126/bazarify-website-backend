@@ -1,31 +1,30 @@
 import express from 'express'
 import jwt from 'jsonwebtoken'
+import { errorMessage, successMessage } from '../../../utils/responseMessage.js'
 
 const router = express.Router()
 
 router.post("/logout", async (req, res) => {
     try {
-        const token = await req.cookies.token
+        const token = req.cookies.token
+
         if (!token) {
-            return res.status(401).send({
-                status: 0,
-                message: 'Unauthorized'
-            })
+            return errorMessage(res, 401, "Unauthorized", [])
         }
-        else {
-            const decoded = jwt.verify(token, process.env.MY_SECRET)
-            if (decoded) {
-                res.clearCookie('token', {
-                    httpOnly: true,
-                    secure: true,
-                    sameSite: "none",
-                })
-                return res.status(200).send({
-                    status: 1,
-                    message: "logout successfully"
-                })
-            }
+
+        const decoded = jwt.verify(token, process.env.MY_SECRET)
+
+        if (!decoded) {
+            return errorMessage(res, 401, "Invalid token", [])
         }
+
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+        })
+
+        return successMessage(res, "Logout successfully", [])
     }
     catch (error) {
         return res.status(500).send({

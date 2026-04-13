@@ -1,5 +1,6 @@
 import express from 'express'
 import { Category } from '../../models/category.model.js'
+import { errorMessage, successMessage } from '../../utils/responseMessage.js'
 
 const router = express.Router()
 
@@ -9,18 +10,11 @@ router.get('/category', async (req, res) => {
         let getCategory = await Category.find()
 
         if (!getCategory) {
-            return res.status(400).send({
-                status: 0,
-                message: "category not found",
-                data: []
-            })
+            errorMessage(res, 404, "category not found", [])
         }
 
-        return res.send({
-            status: 1,
-            message: "all categories fetched successfully",
-            data: getCategory
-        })
+        
+        return successMessage(res, "all categories fetched successfully", getCategory)
     }
     catch (error) {
         return res.status(400).send({
